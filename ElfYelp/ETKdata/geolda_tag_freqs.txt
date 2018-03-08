@@ -1,0 +1,760 @@
+Monsters 18
+The Green Boys 12
+Hidden folks' women and children 19
+Hidden folk in various mounds 20
+About hidden folk one has seen or heard 50
+Chests slammed shut 40
+Rumblings and other sounds in mounds 28
+Smiths in mounds 43
+Hidden folk driving or riding 25
+Cows and other animals with the hidden folk 25
+Hidden folk playing 37
+Accompanying hidden folk 11
+Hidden folk walking about in mounds 11
+Fleeing hidden folk 22
+Hidden folk fetch water 19
+Various work done by hidden folk 20
+Hidden folk women spinning 14
+Helpful hidden folk 32
+On the way to bake or brew 11
+Weddings, childbirths or burials of hidden folk 56
+The forgotten beer pail, hidden folk fall into the fire or brewing beer 32
+Atis and Watis 37
+The cat or the little one by the woodburning stove 30
+The killing of hidden folk 10
+Hidden folk request help 11
+Peelboard and rake repaired 26
+Peelboard and rake, the one who eats has good luck 17
+Peelboard and rake, the one who eats suffers 18
+Peelboard and rake, an animal gets the food 12
+Hidden folk in the parlor and kitchen 26
+Hidden folk take and return something 15
+Hidden folk borrow grain, bread, flour, kitchen tools, etc 43
+Hidden folk steal beer, dough, etc 29
+Hidden folk steal food at parties 29
+Shouting at or talking to hidden folk 39
+Cessation of the destruction of a mound 29
+Punishment of people for destroyed mounds 27
+Destruction of mounds. Animals sick, unrest in the house 32
+Various punishments for the destruction of mounds 17
+Hidden folks' coal, rocks and beetles 18
+Hidden folks' silver and gold 41
+Hidden folks' clothes out on the mounds 35
+Wheels, fire lights, and glowing torches 24
+Song and music at the mounds 25
+Dancing on mounds 33
+Mounds on posts and dancing under neath 65
+Gold chalices 42
+Gold chalices retrieved 17
+Chalices and witching advice 9
+Altar chalices from mounds 37
+Mound taken (kidnapped) returns 40
+Mound taken does not return 46
+Mound taken women are retrieved by husbands 32
+Women consorting with hidden folk 26
+In with the hidden folk 61
+Unbaptized children pursued by hidden folk 11
+Changelings 61
+Advice for changelings 34
+Changelings, the old child 52
+Changelings brought to baptism 2
+Moving the stall 22
+The hidden folk woman's delivery 20
+The hidden folk woman's delivery, the mound man wants to come along 15
+The hidden folk woman's delivery, shavings as payment 14
+The hidden folk woman's delivery, coal, stones, dirt, etc as payment 16
+Fire on the mounds 22
+Fire on the mounds, digging for treasure 14
+Treasure digging, the diggers may not speak 14
+Treasure digging, the town burns 32
+Phantasms appear while digging for treasure, the rooster 15
+Phantasms appear while digging for treasure, carriage, haywagons, etc 23
+Phantasms appear while digging, mice, toads, etc 17
+Dogs, etc on top of the treasure 20
+Moved by the hidden folk 14
+Hidden folk want to leave the mounds 25
+The knife is sharp 12
+Hidden folk make people regret their actions 26
+Hidden folk fight 9
+Hidden folk take vengeance on animals 11
+Riding with the mound man 15
+Hidden folk move 13
+Hidden folk move, ding-danger, etc 24
+Fording of the hidden folk 34
+The hidden folk move, the dead steer 37
+Fairy tale-like legends about hidden folk 67
+Elves one has seen 33
+Grave maidens, hylde folk 13
+The Elf King 14
+Elf children, stolen human children 9
+Seductive elves and accompanying them 23
+The song of the elves 11
+Elf shot 20
+The dance of the elves 25
+Taken by elves 10
+Elves in the houses 15
+The elf woman washes clothes 3
+Elves request or provide help 11
+Elves' theivery 9
+Elves make people regret it 15
+Burned elfwomen 17
+Nisser in farms and houses 21
+Church nisser, ship nisser 8
+Nisse help 23
+The nisse steals 11
+Nisse's rest 15
+Nisse fights, etc 99
+Tricking the nisse 14
+The nisse in logabet??, farmhand on the well rim, etc 26
+Blaze high, blaze low 9
+Teasing the nisse 23
+The nisse's porridge 20
+The nisse's teasing 14
+Nisse as a calf, the loose steer 26
+The killed cow 55
+Nisse's new clothing 5
+The nisse moves or is chased away 11
+Odin's hunter and his dogs 31
+The riding rifleman 45
+Odin's hunters go through a house or farm 27
+Holding Odin's hunter's dogs, etc 5
+Odin's hunter and the elf women 16
+The knark wagon 7
+The night raven 26
+Gammen and the night raven 5
+Dragons 38
+Whirlwinds 6
+Mermen and mermaids 36
+Water horses and water cows 15
+River men 54
+The long horse 38
+Riding over the stream 33
+Lindorm serpents that have been seen 13
+Lindorm serpents in hills 20
+Lindorm serpents in forests, lakes, etc 14
+Lindorm serpents under farms 25
+Lindorm serpents near churches 70
+Lindorm serpents in bonfires 30
+Vipers and grass snakes 24
+The viper king 25
+Hawk-moth caterpillars, etc 15
+The basilisk 16
+Werewolves 34
+Mares (night mares) 27
+From creation 17
+Jesus and St Peter, etc 15
+Birds 37
+Jerusalem's shoemaker 19
+Soul wandering 13
+Holy days' bread, etc 26
+The mass of the dead 28
+The woman in the church 1
+Childbirth 17
+Various things 59
+Heaven letters 9
+Holger Danske 67
+The Sybil's prophecy 96
+The buried animal 26
+Church watchman's game 14
+The corpse lamb shows itself 27
+Lamb as death portent 54
+The grave sow 36
+Horses, headless horses 56
+Calves, black lambs 24
+Dogs, cats, etc 40
+Death portents 108
+Seers 62
+Corpses seen by others 23
+Sound of walking 11
+Vision of shadows 43
+Calling at the window, pricking on the glass, etc 38
+Dog barking 11
+Singing away the corpse lamb 17
+Driving wagons or riding 35
+Portents by tools, drawers or casket hinges 77
+Slamming, plopping, loud noises, etc 19
+Funeral processions in farms or houses 45
+Funeral processions one has seen, or that pass one by 73
+Funeral processions one has met or followed 22
+Meeting funeral processions, moving to the side for them 45
+Seeing oneself in a funeral procession, one's own casket 27
+Swapping the horses for a funeral procession, etc 23
+Drowned sailors 26
+The death ship 10
+Lightmen 52
+Lights on mounds, etc 43
+Morild, lights in houses, etc 66
+Lights in churches 22
+Lights for death 36
+Lights for drowned or hanged 34
+Lights for various misdeeds and accidents 21
+Lights for murder and corpses 19
+Lights for buildings, etc. Moving 62
+Portents for fire 25
+Fire 46
+Fire set in the farm's tree 63
+Bridal processions 16
+Portents for railways 52
+Portents for animals 15
+Portents for war, sightings of soldiers 66
+Portents for strandings and distress at sea 17
+Giants 34
+Giant graves 50
+Giant throws 30
+Giant throws, giants disagree 59
+Giants build churches 29
+Giants throw stones at churches 136
+Giant women throw stones at churches 40
+Stones and earth thrown at churches, builders disagree 32
+Stones thrown at church towers 73
+Stones thrown at church bells 35
+Dams 73
+Large stones 72
+Old dikes and walls 29
+Mounds 59
+Old churches, district churches, places of sacrifice 25
+Various church legends 60
+Wood for church building 27
+Church building 43
+Church towers 44
+Church bells 70
+Church bells in lakes and the sea 58
+Church furnishings and inscriptions 82
+Gravestones 44
+Cemeteries 7
+Ruined churches and chapels 192
+Sunken churches, etc 8
+Promises of the shipwrecked 27
+Virgins build churches 68
+Too long to church 13
+The given sign 16
+Quarrels over construction 20
+Origin of the church name 16
+The church's foundations moved 73
+The two steers, lambs, horses 54
+Trolls disturb the work 37
+The Troll Find 51
+Monasteries 30
+Secret passageways 117
+Crosses, etc 21
+Holy springs 198
+Sunken farms 30
+Sunken farms, pig in the bed, curse of the priest 56
+Sunken farms, pig in the bed 39
+Old named villages 95
+Old villages without name 42
+Construction of manor farms, the ring in the lake 9
+Construction of manor farms in swamps 15
+Various manor farm legends 88
+Previous manor farms 53
+Seige of manor farms 28
+Farms and towns that will sink 21
+Gardens 14
+Barn building, tile ovens 35
+Sponsor gifts 21
+Towns and places 53
+Ruined and broken down towns 68
+Old farms 40
+Previously cultivated land 23
+Parsonages 30
+Mills 40
+Market towns 16
+Assembly places 56
+Roads and boundaries 52
+Lakes and ponds 71
+Sounds, fjords, and sailways 117
+Meadows and swamps 31
+Springs and waterways 26
+Holes in the ground and waterholes 32
+Underground springs 27
+Islands, peninsulas 20
+Trees 35
+Old forests, Ålborg 79
+Old forests, Århus 38
+Old forests, Viborg 37
+Old forests, Ribe and Sønderjylland 30
+Sand movements 55
+Floods, etc 27
+Origin of various placenames 36
+Naive explanations of place names 70
+Light for treasture 51
+Buried money, later found 33
+Buried money, not found 36
+"Now we've got it!" 20
+Treasure in lakes and rivers 37
+Phantasms appear during treasure digging 39
+The dragon or dog on the treasure 36
+Golden ships, golden wagons, etc 40
+King's ransoms 43
+Marks at the treasure's spot 46
+Dreams about treasure 21
+Small kings and their treasures 32
+Kings, buried in mounds 72
+Queens 6
+Princes and princesses 24
+Older Danish kings 40
+Queen Margaret 39
+Christian IV and others 28
+Kings, killed in battle 40
+Old ramparts 29
+Battles 40
+Enemy incidents in history 53
+Swedes and Poles north of the Limfjord 43
+Swedes north of Skanderborg and Silkeborg 61
+Swedes south of Silkeborg 134
+Swedes on the islands 42
+Manor lords and ladies from the olden time 41
+Manor lords 296
+Various unnamed manor lords 51
+The ring in the lake 21
+Manor lords courting 20
+Named aristocratic ladies and mistresses 101
+Unnamed ladies and their conjuring 25
+Discord between manor lords 68
+Murdered maidens 18
+Walled in 45
+Blood spots 23
+Pig skins and the like in the attics of manor farms 49
+Killed priests 28
+Named priests 268
+Unnamed ministers and minister wives 39
+Conjuring the farm hand 46
+Driving with three wheels 61
+Parish clerks and school teachers 25
+Farmers 39
+People in other positions 60
+Particular people and events 58
+Aristocratic robbers 46
+Sea pirates 31
+Beach robbers 14
+Murder 102
+Killed children 28
+Executions 37
+Killed peddlers 60
+Discovery, witnesses 30
+Robber dens 67
+Robberies 21
+Attacks gone wrong 65
+Captured robbers 61
+Robber's Christmas eve 47
+The stolen girl 37
+Unborn boys' hearts 11
+Found skeletons 22
+Thieves 28
+Ship strandings, stranded people, drowned 42
+Plundered sailors 42
+The arrival of the plague 10
+During the plague, burial of the dead 22
+After the plague, the survivors 35
+Man and woman after the plague 47
+Plague pits and palgue thorns 16
+Buried alive, etc 13
+Between trees and grassy squares, in graves 49
+Illnesses 76
+Advice for childhood illnesses 14
+Preventive preparations against disease 10
+Birth marks, etc 16
+All sorts of bad stuff 40
+Many kinds of domesticated animals, horses, cows, etc 41
+Dogs 53
+Cats, etc 15
+Sheep 11
+Geese and hens 16
+Long ghosts one has seen 15
+White shapes 13
+Black shapes 25
+Following along with strange men and women 28
+Headless 26
+Riding headless, headless horses 55
+Riding revenants 29
+Holes in walls and windows 15
+Revenants riding up to the door 47
+Driving revenants on roads and fields 34
+Strange wagons 9
+Lost 30
+Revenants of the hanged, men 48
+Revenants of the hanged, women 20
+Revenants of the drowned 31
+Revenants of the shipwrecked 17
+Murdered different people 36
+Killed servants 7
+Murdered peddlers 30
+Other crimes 15
+Skeletons and corpses dug up 11
+Skulls of the dead, etc 41
+Sheriffs, bailiffs, etc 40
+Old meeting places and execution places 17
+Old rights of way 32
+Writing in rooms 23
+Unnamed manor lords haunt and are conjured 59
+Unnamed ladies haunt 6
+Named ministers haunt 9
+Unnamed ministers haunt 60
+Conjured ministers 25
+Conjured ghosts 39
+Race 7
+Witnesses present 18
+The revenant gains power 22
+Parish clerks help out 23
+The parish clerk goes again 8
+Places where there has been a conjuring 29
+"Push and I'll pull" 11
+Ministers in the cemetery, hauntings in churches 16
+Putting the corpse into the ground 16
+Questions to the dead 17
+In churches 23
+The red eyes 7
+Sitting in a circle 4
+Hauntings at and near cemeteries 30
+Hauntings at old church sites 14
+Dug up corpses, forgiveness 14
+Making fun of the dead 15
+Advice for revenants 28
+Forgotten promises, things that need to be corrected 37
+Hidden money from the olden time 31
+Hidden money, the owner haunts 21
+Children haunting for money 6
+Old hags 25
+Stingy women, etc 21
+Female shapes 41
+Old ladies haunt 33
+The mother comes home to her children 27
+Woman comes home to her husband, sister, brother, mother, son, etc 27
+Undelivered women 25
+Children born in secret and killed. Maidens walking in rooms or farms 30
+Buried children 51
+The murdered child, mother with the knife and washing it or the clothes 35
+Burned and drowned children 35
+Child's crying 18
+Haunting maidens 45
+White maidens 65
+Black maidens 15
+In with maidens 34
+In with farm hands 9
+Glowing revenants 21
+Land surveyors 55
+Moving boundaries 44
+"Here is the proper boundary" 33
+"Where should I put it?" 10
+Conversations with a boundary mover 14
+Night plowing 59
+Conversations with the night plower 8
+Land oaths, turned to stone 55
+The farmer comes home 28
+Haunting in farms and houses 86
+Hauntings in parsonages, schools and mills 39
+Hauntings at manor farms, A-Ø 101
+In manor farm rooms 76
+Rooms in market towns, parsonages, and farmhouses 44
+In stalls 68
+Work in barns 17
+Work in the attic 28
+Tools work at night 36
+About watchmen 8
+"My feet are cold" 18
+Complaints 17
+Hauntings in gardens 11
+Hauntings on roads 58
+The heavy wagon 30
+Revenants on fields 54
+Hauntings in dales, swamps and meadows 34
+Hauntings by rivers, on bridges and in ponds 33
+Hauntings in forests 34
+Hauntings at sea 2
+Various folk beliefs about revenants 6
+Doppelganger 37
+Manor lords, ministers and ladies as doppelgangers 20
+Freemasons 21
+The Black School 11
+Contract, delay 29
+False oath 21
+The sworn one's death and burial 17
+Gotten by the Devil 58
+Cyprianus, Henrik Smed, etc 31
+Getting rid of Cyprianus 12
+Reading in Cyprianus, crows or other animals show themselves 28
+Read Cyprianus and called the Devil  25
+Read Cyprianus, the Devil does various work 28
+Read Cyprianus, the Devil bails lakes, makes dams, etc 19
+The wagon tips or gets stuck 17
+Called the Devil, advice for visits by him 22
+Folk belief about the Devil 3
+The Devil out and about 36
+Ungodly play and games 22
+The Devil as a playing companion 53
+The haywagon 11
+Building fences with the Devil's help 58
+Black dogs and the like show themselves 63
+Black dogs come and get someone 31
+Dog houses 36
+Curses on oneself 22
+Pacts with the Devil concerning money 12
+Dragon dolls, drunkards, changing coins, etc 21
+Freeshot 27
+Cut healers, freeloader. Binding rifles, making oneself hard, etc 32
+Fairy tale like legends about the Devil 5
+Jens Kusk and Hals Priest 48
+Priest-Jens and Begen in Gislum 30
+Per Jakobsen, Frands in Slævstrup, Sander in Lønborg 21
+Particularly well-known wise men 73
+Other wise men 61
+Maren Håning 49
+Wise women 19
+In the wise woman's barn at night 11
+Wise Norwegians 37
+The Norwegian and the mouse 14
+Bound dogs and vipers, quiet bees 16
+The Bissekors, calmed bulls 7
+Calming stampeding horses, making them stampede and lame, quiet plows 45
+Fishing 41
+Showing water 12
+Showing again 46
+Binding people 35
+Poking eyes out 27
+Let coins go, thief fingers, etc 8
+Message to the criminal 19
+Quieting fire 48
+Turning the wind, raising it 12
+On grain, rats and mice 31
+Bracken seed 6
+Getting second sight 34
+The opening stone, blowing locks open 17
+Witch hags 23
+Seers and seeresses 16
+Strange hares 21
+Strange dogs, cats, foxes, toads, etc 19
+Shot at or hit at hares 20
+Hags as hares 32
+Shot a witch in hare or cat form 19
+Witches transformed, when their name is named 13
+Message to witches 11
+Witches brought to the authorities 13
+Ministers and witches 24
+Witches in church 11
+Characteristics of witches 17
+Witches as revenants 14
+Shot with a silver button or inherited silver 23
+Shot with a silver button, arm or leg broken 22
+Witchsalve 7
+Witch churning at springs 21
+The cats' dance in mills and other places 14
+The witches' ride to Troms church or Bloksbjærg 22
+Flame burning 41
+The ride, "All places against" 10
+The farmhand's witch ride 9
+Herring bones, wishbones 3
+Witches' undertakings 38
+How one learns to witch 10
+How one learns to witch, changing the formula 9
+Witches teach their children the art 14
+Evil arts 32
+Witch milking 15
+Milking using knitting needles, etc 18
+Witches take cream, butter, grain, etc 27
+Cream without butter, churning in vain 44
+Moving ovens 9
+Getting rid of pests. Hags drive wolves away 13
+Bad meeting, meeting with a witch 14
+Evil eye 7
+Witching potions 14
+Advice against bewitchment 47
+Men bewitched 32
+Jilted lovers bewitched 31
+Love potions, tried by young men and women 8
+Black arts done to girls 7
+Bewitched wives 32
+Bewitched girls 20
+Bewitched children 29
+Bewitched horses 33
+Bewitched cows 38
+Rules for the treatment of horses and cows 3
+Bewitched calves and steer 29
+Bewitched sheep and pigs 37
+Bewitched eggs, hens, geese, and bees 22
+Beliefs about various animals 14
+Bewitched houses 45
+Something laid in the road 22
+Something laid in the road for one person, another one goes over it 23
+The injury person appears at the scene 27
+Borrowing from the place 12
+Witch blood 12
+Witch burned or scalded 32
+Witch abused in some other way 21
+The end of the witch 33
+Witch burned on the pyre 34
+The victory shirt 10
+General human illness 10
+Witch advice for illnesses 123
+Sick children 23
+Horses illnesses 16
+Witch advice for cow, sheep, etc illness 25
+Other advice for cow, sheep, etc illness 3
+Buried animals 24
+Hidden folks' creation 4
+Steel snakes, grass snakes, eels, etc 4
+The stars 4
+Curses 23
+The ride of the dead 14
+The promise of the dead 9
+The dead mother 3
+Treading on the bread 4
+Flowers 2
+The mixing spoon 2
+Human sacrifice 1
+Portents 7
+Old prayers 30
+Various people and things portend death 12
+Meeting funeral processions, runs over people or people go over it 24
+Suicide portents 12
+Dream portents 12
+Portents for accidents, etc 7
+Various. Unlikely thoughts and strange sounds 10
+Fairy tale-like legends about nisser 39
+Runestones and stones with inscriptions 11
+Church property 7
+Chapels at churches 1
+Holy, healing churches 5
+Figures on the church's wall 5
+Baptismal fonts and pulpits 3
+Church furnishings 29
+Inscriptions 7
+Gravestones in cemeteries 15
+Tithe barns 11
+On the destruction of churches 6
+Desecration of churches 4
+Desecration of holy springs 14
+Various places 14
+Court sites 8
+Fairy tale legends about treasure 1
+Chieftains, buried in mounds 1
+Spaniards and Cossacks 10
+Wise priests 21
+Murdered lovers 11
+Murdered young women 6
+Robbery murder 9
+Poisoned 3
+Mark at the murder location 4
+Muggings 11
+Reasons for illnesses 13
+Pregnant women 23
+The cow plague 4
+Horses 3
+Cattle 6
+The minister's driver is tempted 9
+Tricking the revenant 2
+Hauntings from the sea 2
+Conjuring away 1
+The farm hands conjuring 2
+Women conjured 6
+The future spouse 1
+Village meetings 25
+Fences and peace 21
+Shepherds 28
+From the time of partitioning 23
+Cultivation and the forests 72
+Making hay 3
+Harvest, etc 6
+Harvest feasts, stub barrels, threshing grain 5
+Breeding tools 21
+Farm animals 32
+Calf disease 83
+Wolves and wild boar, etc along with their eradication 122
+Villeinage and other required work 82
+Crafty tenants 28
+Indifference at work 22
+Tithe work 47
+Farmers' feelings of self reliance 61
+Tenant vigilanteism 45
+Punishments 47
+Pleasant and whimsical manor lords 81
+Evil manor lords 65
+The blue virgin 40
+Tenancy and purchase of farms 80
+Forest thievery 34
+Strongmen 206
+Building houses 34
+Manor farm barns 22
+Interiors of houses 34
+Furnishings 38
+Cleanliness in the house 16
+Food and drinks 61
+Daily fare 28
+Different cakes and courses 6
+Uncleanliness with food 31
+Inside and bed clothes 41
+Crafts 19
+Married life 42
+Farmer and servants 22
+Street dancing and new years' gifts 35
+May day 24
+Riding summer in town, St Hans feasts, bonfires, Whitsun feasts, etc 39
+Various feasts 73
+Riding Carnival 17
+Engagement and wedding 99
+Birth and churching women, going to the altar, etc 35
+Funerals 50
+Christmas feast 22
+New Years 7
+Holy three kings (Epiphany) 13
+Lent, Easter, Pentecost, etc 67
+Various livelihoods 49
+Trade 70
+Money before and now 43
+Hunting 28
+Distilling spirits 40
+Customs (tolls) 36
+Medical care 56
+Military service, soldiers and runners 50
+Road- and postal service 46
+Police, meeting and hanging mounds, suicides, stolen farms 60
+Major thieves, counterfeiting 99
+Robbers 24
+Murder of peddlers 35
+Beggars 52
+The life of the nackers 56
+Nacker's work and livelihood 39
+Anecdotes from named nackers' lives 91
+Strandings 21
+Floods and sand movement 195
+Peasants' life view and thoughts on conditions 93
+Enlightenment 26
+Ingenious and clever people 21
+Wise asses 67
+Strange ones 55
+Conceited and simple-minded people 38
+Superstitious people 103
+Ugly people 46
+Courageous people, cowardly people 25
+Hard people 4
+Making fun of the holy 38
+Origin of names, etc 36
+Politeness, pompous speeches 31
+Biting comebacks and funny remarks 57
+Earlier school system 27
+School masters 24
+Parish clerks 89
+Church services parish clerks 20
+Church services ministers 125
+Minister's daily life 73
+Anecdotes about ministers 82
+Strange ministers 59
+Bad ministers 78
+Confirmation preparations 33
+Bishops and deans 82
+The slave war 26
+Book inscriptions 4
+Life histories 124
+Gardens and herbs 3
+Important days 2
+Important periods 1
+Folk belief about other animals 59
+Folk belief about the human body 2
+Folk belief about childhood 2
+Folk belief about luck and misfortune 2
+Portents for fortune and misfortune 2
+Various portents 1
+Death 3
+Smugglers 23
+Interesting expressions, folk speech, greetings, curses, dialect boundaries, names 135
+Calculations 21
+Landscape descriptions 255

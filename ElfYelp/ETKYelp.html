@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ElfYelp with ETK sub-indices</title>
+<style>
+  @import url("../examples/example.css");
+  #map_canvas { width: 500px; height: 725px; }
+.leftmost div {
+    width: 500px;
+  }
+div .rightmost {
+    width: 650px;
+    height: 725px;
+    margin: 0 0 0 5px;
+  }
+.bottommost div {
+    vertical-align: top;
+    width: 1200px;
+    height: 600px;
+    margin: 0 0 0 0px;
+  }
+.bottommostest div {
+    width: 700px;
+    margin: 5 0 0 0px;
+  }
+.hidden div {visibility:hidden;}
+/*    div.rightmost {
+    width: 300px;
+    height: 2048px;
+    margin: 0 0 0 5px;
+  } */
+.container div {
+    display: inline-block;
+    vertical-align: top;
+/*    background-color: #A0A0A0; */
+    background-color: #FFFFFF;
+    font-family: sans-serif;
+  }
+  #parishPaths path {
+    fill: none;
+    stroke-width: 1px;
+    vector-effect: non-scaling-stroke;
+    stroke: brown;
+  }
+  #countyBorders path {
+    fill: none;
+    stroke-width: 1px;
+    vector-effect: non-scaling-stroke;
+    stroke: blue;
+  }
+</style>
+<!--    fill-opacity: .5; -->
+    <!--
+  .layer circle {
+    fill: #B0B0B0; 
+    stroke: brown;
+    vector-effect: non-scaling-stroke;
+  } -->
+
+<script language="JavaScript" type="text/javascript" src="jquery-1.9.1.js"></script>
+<script language="JavaScript" type="text/javascript" src="../polymaps.js"></script>
+<script language="JavaScript" type="text/javascript" src="../nns-master/nns.js"></script>
+<script type="text/javascript">
+
+function padWithZeroes(inputVal, desiredLength) {
+
+  var inputString = inputVal + "";
+
+  while (inputString.length < desiredLength) {
+    inputString = "0" + inputString;
+  }
+  return inputString;
+}
+
+function tileURL(template) {
+
+  return function(c) {
+
+    return template.replace(/{(.)}/g, function(s, v) {
+//        console.log("Z: " + c.zoom + ", X: " + c.row + ", Y: " + c.column);
+      switch(v) {
+        case "Z": return "L" + padWithZeroes(c.zoom.toString(10),2);
+        case "X": return "R" + padWithZeroes(c.row.toString(16),8);
+        case "Y": return "C" + padWithZeroes(c.column.toString(16),8);
+      }
+      return v;
+    });
+  };
+}
+
+var map, po, svg;
+var markers = [];
+//var parishBorders;
+//var counties;
+//var vectors;
+var historicalTiles;
+var aerialTiles;
+//var showStoryTexts = 1;
+//var showPlots = 1;
+var lastClicked;
+
+function initialize() {
+
+  po = org.polymaps;  
+  
+  svg = n$("#map_canvas").add("svg:svg");
+  map = po.map()
+    .container($n(svg))
+    .center({lat: 55.78676, lon: 10.687695})
+    .zoomRange([3, 12])
+    .zoom(7)
+    .add(po.interact());
+
+//  map.add(po.image().url(tileURL("http://localhost/~pbroadwell_local/etkSpace/Documents/tiles/OSM/{Z}/{X}/{Y}.png")));
+  map.add(po.image().url(tileURL("http://etkspace.scandinavian.ucla.edu/tiles/OSM/{Z}/{X}/{Y}.png")));
+
+  historicalTiles = po.image()
+    .id("historicalMap")
+//    .url(tileURL("http://localhost/~pbroadwell_local/etkSpace/Documents/tiles/Denmark/{Z}/{X}/{Y}.png"));
+    .url(tileURL("http://etkspace.scandinavian.ucla.edu/tiles/Denmark/{Z}/{X}/{Y}.png"));
+  map.add(historicalTiles);
+
+  aerialTiles = po.image()
+    .id("aerialMap")
+//    .url(tileURL("http://localhost/~pbroadwell_local/etkSpace/Documents/tiles/FugroAerial/{Z}/{X}/{Y}.jpg"));
+      .url(tileURL("http://etkspace.scandinavian.ucla.edu/tiles/FugroAerial/{Z}/{X}/{Y}.jpg"));
+//  map.add(aerialTiles);
+//  var at = document.getElementById("aerialMap");
+//  at.setAttribute("opacity", 0);
+  
+  compass = po.compass();
+  compass.pan("none");
+
+  map.add(compass);
+
+  console.log("drawing centroids");
+
+  drawLocations();
+  drawCentroids();
+
+}
+
+function selectIndex(indexName) {
+
+  if (document.getElementById(indexName).checked == false) {
+    document.getElementById(indexName).click();
+  } else {
+    getPoints(false, indexName);
+    document.getElementById(indexName).checked = false;
+  }
+}
+
+regionMarkers = [];
+//itemVectors = [];
+
+var regionStats = [];
+
+function drawLocations() {
+
+//    queryStr = 'http://localhost/~pbroadwell_local/maps/ElfYelp/GetPoints.php?datadir=ETKdata';
+  queryStr = 'http://etkspace.scandinavian.ucla.edu/maps/ElfYelp/GetPoints.php?datadir=ETKdata';
+
+  console.log("about to create location points");
+
+    var locMarkers = po.geoJson()
+      .url(queryStr)
+      .id("Locations")
+      .clip(false)
+      .on("load", function(e) {
+
+    for (var i = 0; i < e.features.length; i++) {
+
+      var f = e.features[i],
+          c = f.element,
+          count = 1;
+      
+      if (e.features[i].data.geometry) {
+        var locLon = parseFloat(e.features[i].data.geometry.coordinates[0]);
+        var locLat = parseFloat(e.features[i].data.geometry.coordinates[1]);
+        e.features[i].element.setAttribute('lon',locLon);
+        e.features[i].element.setAttribute('lat',locLat);
+      }
+      
+      if (e.features[i].data.properties) {
+        locationID = e.features[i].data.properties.locationID;
+        e.features[i].element.setAttribute('location_id',locationID);
+
+      }
+      
+      e.features[i].element.setAttribute('fill', '#000000');
+      e.features[i].element.setAttribute('r', 3);
+      e.features[i].element.setAttribute("opacity", .3);
+      //e.features[i].element.setAttribute('onmouseover', '')
+      /* e.features[i].element.addEventListener("mousedown", function(evt){  
+                        centroidClick(this, evt);  
+                        }, false); 
+      */
+
+  }
+  });       
+
+  map.add(locMarkers);
+
+}
+
+
+function drawCentroids() {
+
+//  queryStr = 'http://localhost/~pbroadwell_local/maps/ElfYelp/GetETKData.php?datadir=ETKData';
+  queryStr = 'http://etkspace.scandinavian.ucla.edu/maps/ElfYelp/GetETKData.php?datadir=ETKData';
+
+  console.log("about to create markers");
+
+    var newMarkers = po.geoJson()
+      .url(queryStr)
+      .id("GeoLDA")
+      .clip(false)
+      .on("load", function(e) {
+
+          console.log("drawing features");
+
+  for (var i = 0; i < e.features.length; i++) {
+
+  var f = e.features[i],
+      c = f.element,
+      count = 1;
+//      refStories = "",
+//      placeNames = "";
+
+    lastClicked = e.features[i].element;
+
+    if (e.features[i].data.geometry) {
+      var markerLon = parseFloat(e.features[i].data.geometry.coordinates[0]);
+      var markerLat = parseFloat(e.features[i].data.geometry.coordinates[1]);
+      e.features[i].element.setAttribute('lon',markerLon);
+      e.features[i].element.setAttribute('lat',markerLat);
+    }
+      
+    if (e.features[i].data.properties) {
+      regionID = e.features[i].data.properties.regionID;
+      e.features[i].element.setAttribute('region_id',regionID);
+
+      regionStats[regionID] = e.features[i].data.properties.topics;
+    }
+/*
+    g.addEventListener("mouseover", function(evt){  
+                        markerMouse(this, evt, "black", 1);  
+                       }, false); 
+    g.addEventListener("mouseout", function(evt){  
+                        markerMouse(this, evt, indexColors[itemName], 1);
+                       }, false); 
+    g.addEventListener("mousedown", function(evt){  
+                        markerClick(this, evt);  
+                      }, false); 
+
+ */
+
+      e.features[i].element.setAttribute('fill', '#eb6a52');
+     e.features[i].element.setAttribute('r',8);
+      e.features[i].element.setAttribute("opacity", .7);
+    //e.features[i].element.setAttribute('onmouseover', '')
+    e.features[i].element.addEventListener("mousedown", function(evt){  
+                        centroidClick(this, evt);  
+                      }, false); 
+
+
+  }
+  });
+
+  map.add(newMarkers);
+//  itemMarkers[itemName] = newMarkers;
+
+}
+
+function centroidClick(f, evt) {
+
+  var regionID = f.getAttribute("region_id");
+//  var regionInfo = regionStats[regionID];
+  var lon = f.getAttribute("lon");
+  var lat = f.getAttribute("lat");
+
+  lastClicked.setAttribute('fill', '#eb6a52');
+  lastClicked.setAttribute('r', 8);
+  lastClicked.setAttribute("opacity", .7);
+  lastClicked.setAttribute("stroke-width", 0);
+
+  lastClicked = f;
+
+  f.setAttribute('fill', '#F3F315');
+  f.setAttribute('r', 15);
+  f.setAttribute("opacity", .8);
+  f.setAttribute("stroke", '#000000');
+  f.setAttribute("stroke-width", '1');
+
+  var regionInfo = document.getElementById('region_info');
+
+  var blurbtext = "<b>Region " + regionID + "</b> centered at " + lat + "N, " + lon + "E<br>";
+  blurbtext += "<br>GEOTOPICS in this region, with prominent words:<br><br>";
+  
+  for (var t=0; (t < regionStats[regionID].length); t++) {
+    blurbtext += "TOPIC " + regionStats[regionID][t]["topicID"] + " (" +
+      regionStats[regionID][t]["topicPercent"] + "):<br>";
+    for (var w=0; ((w < 15) && (w < regionStats[regionID][t]["topicWords"].length)); w++) {
+      blurbtext += regionStats[regionID][t]["topicWords"][w]["word"] + " (" +
+        regionStats[regionID][t]["topicWords"][w]["wordPercent"] + ")<br>";
+    }
+    blurbtext += "<br>";
+  }
+
+  var blurb = "<div class='info_blurb'>" + blurbtext + "</div>";
+  regionInfo.innerHTML = blurb;
+
+/*
+  var blurbtext = "<b>click to close</b><br>" + freq + storiesWord + 'in the category "' + indexCategories[f.getAttribute("index")] + '"' + mentionWord + 'this place.<br>Coords: ' + f.getAttribute("lat") + "N, " + f.getAttribute("lon") + "E<br><b>Story ID=>Place name (ID)</b><br>" + f.getAttribute("places");
+  var blurb = "<div class='info_blurb'>" + blurbtext + "</div>";
+
+  var infowin = document.getElementById('infowin');
+  infowin.style.width = "250px";
+  infowin.style.maxHeight = "200px";
+  infowin.style.overflow = "auto";
+  infowin.style.left = evt.clientX + "px";
+  infowin.style.top = evt.clientY + "px";
+  infowin.style.position = 'absolute';
+  infowin.style.display = 'block';
+  infowin.style.border = '1px solid';
+                      
+  infowin.innerHTML = blurb; 
+  
+  infowin.addEventListener("mousedown", function(evt){  
+                            infowin.innerHTML = "";
+                            infowin.style.border = '';
+                            }, false); 
+  */
+}
+
+/*
+function markerMouse(f, evt, fillcolor, opacity){
+  //  var featName = f.getAttribute("feat_name");
+  f.setAttribute("fill", fillcolor);
+  f.setAttribute("opacity", opacity);
+}
+*/
+
+function pollImage(imageURL) {
+
+  var checkImage = function() {
+    $.ajax({
+      type: 'HEAD',
+      url: imageURL,
+      success: function (data) {
+        console.log("Found image " + imageURL);
+        imgHTML = document.getElementById("imagearea").innerHTML;
+        imgHTML += '<img src="'+imageURL+'" width="500px" height="500px">';
+        document.getElementById("imagearea").innerHTML = imgHTML;
+        clearInterval(interval);
+      },
+      error: function (result) {
+        console.log("Couldn't load image " + imageURL);
+      }
+//      complete: function() { pollImage(imageURL); }
+    });
+  };
+  var interval = setInterval(checkImage, 2000); 
+  checkImage();
+};
+
+indexColors = [];
+
+indexColors['ETK_churches'] = "#D8BF92";
+indexColors['ETK_cunningmen'] = "#FFFF00"; 
+indexColors['ETK_deathport'] = "#F4A460"; 
+indexColors['ETK_devil'] = "#FFD700"; 
+indexColors['ETK_elves'] = "#FF8C00"; 
+indexColors['ETK_farmtowns'] = "#FF7F50"; 
+indexColors['ETK_femalerev'] = "#FF4500"; 
+indexColors['ETK_forbears'] = "#FF0000"; 
+indexColors['ETK_hauntrev'] = "#FF00FF"; 
+indexColors['ETK_heroes'] = "#FF69B4"; 
+indexColors['ETK_houses'] = "#B22222"; 
+indexColors['ETK_illnesses'] = "#DDA0DD"; 
+indexColors['ETK_lightport'] = "#B0C4DE"; 
+indexColors['ETK_manorlords'] = "#87CEEB"; 
+indexColors['ETK_ministers'] = "#ADFF2F"; 
+indexColors['ETK_mound'] = "#90EE90"; 
+indexColors['ETK_nisser'] = "#808000"; 
+indexColors['ETK_oldagriculture'] = "#6A6ACD"; 
+indexColors['ETK_outdoors'] = "#556B2F"; 
+indexColors['ETK_parties'] = "#7FFF00"; 
+indexColors['ETK_people'] = "#708090"; 
+indexColors['ETK_placelegends'] = "#696969"; 
+indexColors['ETK_plague'] = "#2F4F4F"; 
+indexColors['ETK_religious'] = "#006400"; 
+indexColors['ETK_revenantsland'] = "#000080"; 
+indexColors['ETK_revenantsplaces'] = "#020202"; 
+indexColors['ETK_robbers'] = "#800080"; 
+indexColors['ETK_smallkings'] = "#DC143C"; 
+indexColors['ETK_strandings'] = "#FF69B4"; 
+indexColors['ETK_travmonst'] = "#778899"; 
+indexColors['ETK_treasure'] = "#00FA9A"; 
+indexColors['ETK_villeinage'] = "#8B0000"; 
+indexColors['ETK_waterspirits'] = "#BABAB2"; 
+indexColors['ETK_werenight'] = "#CD5C5C"; 
+indexColors['ETK_witches'] = "#91C2A8"; 
+indexColors['ETK_wivernsetc'] = "#8B4513"; 
+
+indexColors['Informant_1446'] = "#000000";
+indexColors['Informant_779'] = "#000000";
+indexColors['Informant_454'] = "#000000";
+indexColors['Informant_1414'] = "#000000";
+indexColors['Informant_1605'] = "#000000";
+
+var indexCategories = [];
+
+indexCategories['ETK_churches'] = "Churches and their construction. Monasteries, holy springs, etc.";
+indexCategories['ETK_cunningmen'] = "Cunning men and women and their activities"; 
+indexCategories['ETK_deathport'] = "Death portents"; 
+indexCategories['ETK_devil'] = "About the Devil and being in league with him"; 
+indexCategories['ETK_elves'] = "Elves"; 
+indexCategories['ETK_farmtowns'] = "Legends about farms and towns"; 
+indexCategories['ETK_femalerev'] = "Female revenants"; 
+indexCategories['ETK_forbears'] = "Our forbears' way of thinking and spiritual live"; 
+indexCategories['ETK_hauntrev'] = "Diverse hauntings and conjuring of revenants"; 
+indexCategories['ETK_heroes'] = "Heroes and their sport"; 
+indexCategories['ETK_houses'] = "Houses and life in them"; 
+indexCategories['ETK_illnesses'] = "Human and cattle illnesses"; 
+indexCategories['ETK_lightport'] = "Lights and portents"; 
+indexCategories['ETK_manorlords'] = "Manor lords, ladies, and mistresses"; 
+indexCategories['ETK_ministers'] = "Minisers"; 
+indexCategories['ETK_mound'] = "Mound dwellers (Hidden folk)"; 
+indexCategories['ETK_nisser'] = "Household spirits"; 
+indexCategories['ETK_oldagriculture'] = "Concerning earlier agricultural practices"; 
+indexCategories['ETK_outdoors'] = "Outdoor life"; 
+indexCategories['ETK_parties'] = "Social gatherings and parties"; 
+indexCategories['ETK_people'] = "Diverse people"; 
+indexCategories['ETK_placelegends'] = "Diverse place legends"; 
+indexCategories['ETK_plague'] = "Plague and illnesses"; 
+indexCategories['ETK_religious'] = "Religious legends"; 
+indexCategories['ETK_revenantsland'] = "Revenants on ill-gotten land"; 
+indexCategories['ETK_revenantsplaces'] = "Revenants in diverse places"; 
+indexCategories['ETK_robbers'] = "Robbers, murderers and thieves"; 
+indexCategories['ETK_smallkings'] = "Small kings and their feuds. Kings. Enemy invasions"; 
+indexCategories['ETK_strandings'] = "Strandings"; 
+indexCategories['ETK_travmonst'] = "Traveling monsters"; 
+indexCategories['ETK_treasure'] = "Legends about treasure"; 
+indexCategories['ETK_villeinage'] = "From the time of villeinage"; 
+indexCategories['ETK_waterspirits'] = "Water spirits"; 
+indexCategories['ETK_werenight'] = "Werewolves and nightmares"; 
+indexCategories['ETK_witches'] = "Witches and their sport"; 
+indexCategories['ETK_wivernsetc'] = "Wiverns and small creepy-crawlies"; 
+
+indexCategories['Informant_1446'] = "(Ane) Margrete Jensdatter"; 
+indexCategories['Informant_779'] = "Jens (Bitte Jens) Kristensen"; 
+indexCategories['Informant_454'] = "Jens Peter Pedersen"; 
+indexCategories['Informant_1414'] = "Kirsten Marie Pedersdatter"; 
+indexCategories['Informant_1605'] = "Peder Johansen"; 
+
+</script>
+
+<!-- <link rel="shortcut icon" type="image/png" href="http://localhost/~pbroadwell_local/etkSpace/Documents/favicon.ico" /> -->
+
+</head>
+<body onload="initialize();">
+<div id="controlsDiv"></div>
+</div>
+<div id="status"></div>
+<div class="container">
+  <p><b>ELF YELP using ETK sub-indces</b></p>
+  <div id="map_wrapper" class="leftmost">
+    <div id="map_canvas" style="vertical-align:top"></div><br>
+    <div width="500px" style="text-align:right;vertical-align:bottom;font-size:10px;color:#000000">Map data CC-By-SA <a href="http://www.openstreetmap.org/">OpenStreetMap</a>, <a href="http://fugro.openstreetmap.dk">Fugro Aerial Mapping A/S</a></div>
+  </div>
+  <div id="infowin" class="info_window" style="display:none"></div>
+  <div id="region_info" class="rightmost">
+    <!--    <input name="box" type="checkbox" id="centroids" onClick="drawCentroids()" /> -->
+  </div>
+  <div class="bottommost" id="imagearea">
+  </div>
+  
+  <div class="bottommostest" id="storytexts">
+  </div>
+
+</body>
+</html>

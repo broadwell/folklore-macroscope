@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Spøgelsesskop</title>
+<style>
+  #map_canvas { width: 560px; height: 924px; }
+  div .left {
+    width: 570px;
+    height: 1024px;
+  }
+  div .right {
+    width: 550px;
+    height: 924px;
+    margin: 0 0 0 20px;
+  }
+  .container div {
+    display: inline-block;
+    vertical-align: top;
+}
+</style>
+
+<script type="text/javascript"src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<script language="JavaScript" type="text/javascript" src="CustomTileLayer.js"></script>
+<script language="JavaScript" type="text/javascript" src="TileLayerControlV3.js"></script>
+<script language="JavaScript" type="text/javascript" src="../jquery-1.7.2.js"></script>
+<!-- <script language="JavaScript" type="text/javascript" src="polymaps.js"></script> -->
+<script type="text/javascript">
+var poly, map;
+var markers = [];
+var path = new google.maps.MVCArray;
+var runBefore = 0;
+
+var layer;
+//var tableid = 3387163;
+var tableid = 3955235; // Place mentioned density
+
+var selectedMode="showKeywords";
+
+var infowindow = null;
+
+function initialize() {
+  map = new google.maps.Map(document.getElementById('map_canvas'), {
+    center: new google.maps.LatLng(56.48676175249088, 9.5876953125),
+    zoom: 8,
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  });
+
+  var oDiv = document.getElementById('controlsDiv');
+  oDiv.innerHTML = '';
+
+//  addOverlay('Historical maps', "https://cloud.sdsc.edu/v1/AUTH_dfl/etk-monochrome");
+//  addOverlay('Historical maps', "http://localhost/~pbroadwell_local/etkSpace/Documents/tiles/Denmark");
+  addOverlay('Historical maps', "http://etkspace.scandinavian.ucla.edu/tiles/Denmark");
+/*
+  layer = new google.maps.FusionTablesLayer(tableid);
+  layer.setQuery("SELECT 'shape' FROM " + tableid);
+  layer.setMap(map);
+*/
+
+  poly = new google.maps.Polygon({
+      strokeWeight: 3,
+      fillColor: '#5555FF'
+  });
+  poly.setMap(map);
+  poly.setPaths(new google.maps.MVCArray([path]));
+
+  google.maps.event.addListener(map, "click", mapClick);
+
+  infowindow = new google.maps.InfoWindow({
+    content: "holding…"
+  });
+
+}
+
+var lastLat = -1;
+var lastLon = -1;
+
+function mapClick(e) {
+
+  clickedLat = e.latLng.lat();
+  clickedLon = e.latLng.lng();
+
+  lastLat = clickedLat;
+  lastLon = clickedLon;
+
+  handleClick(clickedLon, clickedLat);
+
+}
+
+function handleClick(clickedLon, clickedLat) {
+
+  infowindow.close();
+
+  $("#status").html('<b>PROCESSING...</b>');
+
+  if (runBefore == 1) {
+
+    $("#raw").html('<p><b>Raw:</b><br><i>Processing...</i></p>');
+    $("#rfipf").html('<p><b>RF-IPF:</b><br><i>Processing...</i></p>');
+    $("#normalized").html('<p><b>RF-IPF:</b><br><i>Processing...</i></p>');
+  } else {
+    runBefore = 1;
+  }
+
+  for (var i = 0; i < markers.length; i++) {
+      markers[i].setMap(null);
+  }
+  markers = [];
+
+  var len = path.getLength();
+  for (var i = 0; i < len; ++i) {
+    path.pop();
+  }
+/*
+  var marker = new google.maps.Marker({
+    position: e.latLng,
+    map: map,
+  });
+  markers.push(marker);
+  marker.setTitle("Selected: " + clickedLat + 'N ' + clickedLon + 'E');
+*/
+  rad = parseFloat($("#search_radius").val());
+  max_keywords = parseInt($("#max_keywords").val());
+
+  topLeft = new google.maps.LatLng(clickedLat + rad + .01, clickedLon - rad*2);
+  topRight = new google.maps.LatLng(clickedLat + rad + .01, clickedLon + rad*2);
+  botLeft = new google.maps.LatLng(clickedLat - rad, clickedLon - rad*2);
+  botRight = new google.maps.LatLng(clickedLat - rad, clickedLon + rad*2);
+
+  path.insertAt(path.length, topLeft);
+  path.insertAt(path.length, topRight);
+  path.insertAt(path.length, botRight);
+  path.insertAt(path.length, botLeft);
+
+  if (selectedMode == "showKeywords") {
+    queryStr = 'http://etkspace.scandinavian.ucla.edu/maps/scope/FindNearbyKeywords.php?lat=' + clickedLat + '&lon=' + clickedLon + '&dist=' + rad + '&max=' + max_keywords;
+  } else if (selectedMode == "showETKIndices") {
+    queryStr = 'http://etkspace.scandinavian.ucla.edu/maps/scope/FindNearbyETKIndices.php?lat=' + clickedLat + '&lon=' + clickedLon + '&dist=' + rad + '&max=' + max_keywords;
+  } else if (selectedMode == "showMimnoIndices") {
+    queryStr = 'http://etkspace.scandinavian.ucla.edu/maps/scope/FindNearbyMimnoIndices.php?lat=' + clickedLat + '&lon=' + clickedLon + '&dist=' + rad + '&max=' + max_keywords;
+  }
+
+  $.getJSON(queryStr,
+    function(json) {
+
+      $("#raw").html(json.raw);
+      $("#rfipf").html(json.rfipf);
+      $("#normalized").html(json.normalized);
+
+      $("#status").html('');
+
+      for (i=0; i<json.points.length; i++) {
+        var mpos = new google.maps.LatLng(json.points[i].lat, json.points[i].lon);
+
+	var markerCoords = json.points[i].lat + 'N, ' + json.points[i].lon + 'E';
+
+	var contentString = '<b>Coords:</b> ' + json.points[i].lat + 'N, ' + json.points[i].lon + 'E<br><b>Places:</b> ' + json.points[i].places + '<br><b>Terms:</b> ' + json.points[i].keywords;
+
+        var marker = new google.maps.Marker({
+          position: mpos,
+          map: map,
+	  title: markerCoords,
+	  html: contentString
+        });
+
+	google.maps.event.addListener(marker, 'click', function() {
+	  infowindow.setContent(this.html);
+	  infowindow.open(map, this);
+        });
+
+	marker.setIcon('storyIconDS.png');
+
+        markers.push(marker);
+
+        //marker.setTitle("Selected: " + clickedLat + 'N ' + clickedLon + 'E');
+      }
+
+    }); 
+
+}
+
+
+function addOverlay(theme, baseAddress) {
+
+    // PMB Don't add the overlay if it's already there
+    // XXX I'm not sure this code works, and it should be rendered unnecessary
+    // by the check at the beginning of initializeMap() -- OR NOT?
+
+    var overlayMap = new CustomTileLayer(map,theme,baseAddress);
+    map.overlayMapTypes.insertAt(0, overlayMap);
+
+    var oDiv = document.getElementById('controlsDiv');
+
+    var tlcOptions = {
+        parent: oDiv,
+        overlay: overlayMap,
+        caption: theme.toUpperCase()
+    }
+    var tlc = new TileLayerControl(tlcOptions);
+            
+}
+
+function modeClicked(modeName) {
+
+  if (modeName == selectedMode) {
+    document.getElementById(modeName).checked = true;
+    return;
+  }
+
+  selectedMode=modeName;
+
+  if (modeName == "showKeywords") {
+    document.getElementById("showETKIndices").checked = false;
+    document.getElementById("showMimnoIndices").checked = false;
+  } else if (modeName == "showETKIndices") {
+    document.getElementById("showKeywords").checked = false;
+    document.getElementById("showMimnoIndices").checked = false;
+  } else if (modeName == "showMimnoIndices") {
+    document.getElementById("showKeywords").checked = false;
+    document.getElementById("showETKIndices").checked = false;
+  }
+
+  if (lastLat != -1) {
+    handleClick(lastLon, lastLat);
+  }
+
+}
+
+</script>
+
+</head>
+<body onload="initialize();">
+
+<div id="controlsDiv"></div>
+<div id="parameters">
+<b>Search radius (in degrees):</b> <input type="number" size="3" id="search_radius" value=".1"  />
+<b>Number of terms to display:</b> <input type="number" size="3" id="max_keywords" value="10"  />
+.1 deg = 25km (15.5mi)<br>
+</div>
+<div id="status"></div>
+<div class="container">
+  <div id="map_canvas" class="left"></div>
+  <div id="resultsDiv" class="right">
+    <p><b>Display options:</b></p>
+    <input name="box" type="checkbox" id="showKeywords" checked="true" onClick="modeClicked('showKeywords')" />
+    <a href="#" onClick="modeClicked('showKeywords');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Show keyword cooccurrences</div></a><br>
+    <input name="box" type="checkbox" id="showETKIndices" onClick="modeClicked('showETKIndices')" />
+    <a href="#" onClick="modeClicked('showETKIndices');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Show ETK index cooccurrences</div></a><br>
+    <input name="box" type="checkbox" id="showMimnoIndices" onClick="modeClicked('showMimnoIndices')" />
+    <a href="#" onClick="modeClicked('showMimnoIndices');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Show Mimno index cooccurrences</div></a><br>
+    <div id="raw"></div>
+    <div id="normalized"></div>
+    <div id="rfipf"></div>
+  </div>
+</div>
+
+</body>
+</html>

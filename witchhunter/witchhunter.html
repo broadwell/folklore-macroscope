@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WitchHunter: Mapping the Evald Tang Kristensen Collection</title>
+<style>
+  @import url("../examples/example.css");
+  #map_canvas { width: 525px; height: 700px; }
+.leftmost div {
+    width: 525px;
+  }
+div .rightmost {
+    width: 335px;
+    height: 700px;
+    margin: 0 0 0 5px;
+  }
+div .rightmostest {
+    width: 335px;
+    height: 700px;
+    margin: 0 0 0 5px;
+  }
+.bottommost div {
+    vertical-align: top;
+    width: 1200px;
+    height: 600px;
+    margin: 0 0 0 0px;
+  }
+.bottommostest div {
+    width: 700px;
+    margin: 5 0 0 0px;
+  }
+.hidden div {visibility:hidden;}
+/*    div.rightmost {
+    width: 300px;
+    height: 2048px;
+    margin: 0 0 0 5px;
+  } */
+.container div {
+    display: inline-block;
+    vertical-align: top;
+/*    background-color: #A0A0A0; */
+    background-color: #FFFFFF;
+    font-family: sans-serif;
+  }
+  #parishPaths path {
+    fill: none;
+    stroke-width: 1px;
+    vector-effect: non-scaling-stroke;
+    stroke: brown;
+  }
+  #countyBorders path {
+    fill: none;
+    stroke-width: 1px;
+    vector-effect: non-scaling-stroke;
+    stroke: blue;
+  }
+</style>
+<!--    fill-opacity: .5; -->
+    <!--
+  .layer circle {
+    fill: #B0B0B0; 
+    stroke: brown;
+    vector-effect: non-scaling-stroke;
+  } -->
+
+<script language="JavaScript" type="text/javascript" src="jquery-1.9.1.js"></script>
+<script language="JavaScript" type="text/javascript" src="../polymaps.js"></script>
+<script language="JavaScript" type="text/javascript" src="../triangleicon.js"></script>
+<script language="JavaScript" type="text/javascript" src="../nns-master/nns.js"></script>
+<script type="text/javascript">
+
+function padWithZeroes(inputVal, desiredLength) {
+
+  var inputString = inputVal + "";
+
+  while (inputString.length < desiredLength) {
+    inputString = "0" + inputString;
+  }
+  return inputString;
+}
+
+function tileURL(template) {
+
+  return function(c) {
+
+    return template.replace(/{(.)}/g, function(s, v) {
+//        console.log("Z: " + c.zoom + ", X: " + c.row + ", Y: " + c.column);
+      switch(v) {
+        case "Z": return "L" + padWithZeroes(c.zoom.toString(10),2);
+        case "X": return "R" + padWithZeroes(c.row.toString(16),8);
+        case "Y": return "C" + padWithZeroes(c.column.toString(16),8);
+      }
+      return v;
+    });
+  };
+}
+
+var map, po, svg;
+var markers = [];
+var parishBorders;
+var counties;
+//var vectors;
+var historicalTiles;
+var aerialTiles;
+var showStoryTexts = 1;
+var showPlots = 1;
+
+function initialize() {
+
+  po = org.polymaps;  
+  
+  svg = n$("#map_canvas").add("svg:svg");
+/*
+  div = document.getElementById("map_canvas");
+  g = div.appendChild(po.svg("svg"));
+*/ 
+  map = po.map()
+//    .container(g)
+    .container($n(svg))
+//    .center({lat: 55.08676, lon: 10.687695})
+    .center({lat: 55.78676, lon: 10.687695})
+    .zoomRange([3, 12])
+    .zoom(7)
+    .add(po.interact());
+
+//  map.add(po.image().url(tileURL("http://localhost/~pbroadwell_local/etkSpace/Documents/tiles/OSM/{Z}/{X}/{Y}.png")));
+  map.add(po.image().url(tileURL("http://etkspace.scandinavian.ucla.edu/tiles/OSM/{Z}/{X}/{Y}.png")));
+
+  historicalTiles = po.image()
+    .id("historicalMap")
+//    .url(tileURL("http://localhost/~pbroadwell_local/etkSpace/Documents/tiles/Denmark/{Z}/{X}/{Y}.png"));
+    .url(tileURL("http://etkspace.scandinavian.ucla.edu/tiles/Denmark/{Z}/{X}/{Y}.png"));
+  map.add(historicalTiles);
+
+  aerialTiles = po.image()
+    .id("aerialMap")
+//    .url(tileURL("http://localhost/~pbroadwell_local/etkSpace/Documents/tiles/FugroAerial/{Z}/{X}/{Y}.jpg"));
+      .url(tileURL("http://etkspace.scandinavian.ucla.edu/tiles/FugroAerial/{Z}/{X}/{Y}.jpg"));
+//  map.add(aerialTiles);
+//  var at = document.getElementById("aerialMap");
+//  at.setAttribute("opacity", 0);
+
+  counties = po.geoJson()
+    .id("countyBorders")
+    .clip(false)
+//    .url("http://localhost/~pbroadwell_local/maps/counties_extended.json");
+    .url("http://etkspace.scandinavian.ucla.edu/maps/counties_extended.json");
+/*    .on("load", function(e) {
+     }) */
+
+  parishBorders = po.geoJson()
+    .id("parishPaths")
+    .clip(false)
+//    .url("http://localhost/~pbroadwell_local/maps/sogne.json")
+    .url("http://etkspace.scandinavian.ucla.edu/maps/sogne.json")
+    .on("load", function(e) {
+
+      var lastRegion = "BLAH";
+      var regionAdded = false;
+
+      for (var i = 0; i < e.features.length; i++) {
+        var c = n$(e.features[i].element);
+        var elt = e.features[i].element;
+        var p = elt.parentNode;
+
+        var regionID = e.features[i].data.properties["NAVN"];
+
+        if (regionID != lastRegion) {
+          regionAdded = false;
+
+          regionStartDate = e.features[i].data.properties["FRA_WMS_DA"];
+          regionStartYear = parseInt(regionStartDate.substr(0,4));
+
+          if ((regionStartYear > 1600) && (regionStartYear < 9999) && (regionAdded == false)) {
+            regionAdded = true;
+            lastRegion = regionID;
+
+/*
+            var g = c.parent().add("svg:g", c);
+
+            g.add(c
+              .attr("fill", null)
+              .attr("opacity", 1)
+              );
+              */
+          } else {
+            p.removeChild(elt);
+          }
+        } else {
+          if (regionAdded == true) {
+            p.removeChild(elt);
+          }
+        }
+      }
+    }
+
+  );
+
+  map.add(parishBorders);
+  var pb = document.getElementById("parishPaths");
+  pb.setAttribute("opacity", 0);
+  
+  map.add(counties);
+  var ce = document.getElementById("countyBorders");
+  ce.setAttribute("opacity", 0);
+
+//  map.add(vectors);
+//  var dv = document.getElementById("directionVectors");
+//  dv.setAttribute("opacity", 0);
+
+  compass = po.compass();
+  compass.pan("none");
+
+  map.add(compass);
+
+//  map.container().setAttribute("class", "Blues");
+
+//  map.container().addEventListener("mousedown", mapClick, false);
+  
+}
+
+function selectIndex(indexName) {
+
+  if (document.getElementById(indexName).checked == false) {
+    document.getElementById(indexName).click();
+  } else {
+    getPoints(false, indexName);
+    document.getElementById(indexName).checked = false;
+  }
+}
+
+itemMarkers = [];
+itemVectors = [];
+
+function drawMarkers(itemName) {
+
+//  queryStr = 'http://localhost/~pbroadwell_local/maps/witchhunter/GetIndexPoints.php?itemName=' + itemName;
+  queryStr = 'http://etkspace.scandinavian.ucla.edu/maps/witchhunter/GetIndexPoints.php?itemName=' + itemName;
+  
+    var newMarkers = po.geoJson()
+      .url(queryStr)
+      .id(itemName)
+      .clip(false)
+      .on("load", function(e) {
+
+  for (var i = 0; i < e.features.length; i++) {
+
+  var f = e.features[i],
+      c = f.element,
+      count = 1,
+      refStories = "",
+      placeNames = "";
+      
+    if (e.features[i].data.geometry) {
+      var markerLon = parseFloat(e.features[i].data.geometry.coordinates[0]);
+      var markerLat = parseFloat(e.features[i].data.geometry.coordinates[1]);
+    }
+      
+    if (e.features[i].data.properties) {
+      count = parseFloat(e.features[i].data.properties.count);
+      placeNames = e.features[i].data.properties.places;
+      refStories = e.features[i].data.properties.stories;
+    } else if (c.attr("count")) {
+      count = c.attr("count");
+    }
+
+    ncount = count / 20;
+
+    var r = ncount * 100 * Math.pow(2, e.tile.zoom - 8);
+
+  svg.add("svg:radialGradient")
+     .attr("id", "gradient" + itemName)
+        .add("svg:stop")
+          .attr("offset", "0%")
+          .attr("stop-color", indexColors[itemName])
+          .parent()
+             .add("svg:stop")
+                  .attr("offset", "100%")
+                  .attr("stop-color", "#888888")
+                  .attr("stop-opacity", 0);
+
+  d = f.element = po.svg("circle");
+
+  d.setAttribute("r", r);
+  d.setAttribute("count", ncount);
+  d.setAttribute("opacity", .9);
+  d.setAttribute("fill", "url(#gradient"+itemName+")");
+  d.setAttribute("transform", c.getAttribute("transform"));
+
+  c.parentNode.replaceChild(d, c);
+
+    g = f.element = po.svg("rect");
+
+    g.setAttribute("width", 4);
+    g.setAttribute("height", r);
+    g.setAttribute("x", -2);
+    g.setAttribute("y", -r);
+    g.setAttribute("title", count);
+    g.setAttribute("transform", d.getAttribute("transform"));
+    g.setAttribute("fill", indexColors[itemName]);
+    g.setAttribute("stroke", "black");
+    g.setAttribute("lat", markerLat);
+    g.setAttribute("lon", markerLon);
+    g.setAttribute("freq", count);
+    g.setAttribute("index", itemName);
+    g.setAttribute("places", placeNames);
+    g.setAttribute("stories", refStories);
+    g.setAttribute("vector-effect", "non-scaling-stroke");
+    g.addEventListener("mouseover", function(evt){  
+                        markerMouse(this, evt, "black", 1);  
+                       }, false); 
+    g.addEventListener("mouseout", function(evt){  
+                        markerMouse(this, evt, indexColors[itemName], 1);
+                       }, false); 
+    g.addEventListener("mousedown", function(evt){  
+                        markerClick(this, evt);  
+                      }, false); 
+
+    d.parentNode.appendChild(g);
+
+  }
+  });       
+
+  map.add(newMarkers);
+  itemMarkers[itemName] = newMarkers;
+
+}
+
+function lineClick(f, evt) {
+
+  var storiesWord = " stories ";
+  var mentionWord = " mention ";
+  var freq = f.getAttribute("freq");
+  if (freq == 1) {
+    storiesWord = " story ";
+    mentionWord = " mentions ";
+  }
+
+  var refInfo = "";
+  var refStories = f.getAttribute("stories").split(" ");
+  var refPlacePairs = f.getAttribute("placepairs").split(" ");
+
+  var uniqueStories = [];
+
+  for (var i=0; i < refStories.length; i++) {
+    if ($.inArray(refStories[i], uniqueStories) == -1) {
+      uniqueStories.push(refStories[i]);
+    }
+    refInfo += "<br>" + refStories[i] + ": " + refPlacePairs[i];
+  }
+  
+ if (showStoryTexts == 1) {
+  var uniqueStoriesString = uniqueStories.join("-");
+
+//  var storyURL = "http://localhost/~pbroadwell_local/maps/witchhunter/GetStories.php?stories=" + uniqueStoriesString; 
+  var storyURL = "http://etkspace.scandinavian.ucla.edu/maps/witchhunter/GetStories.php?stories=" + uniqueStoriesString;
+  $.getJSON( storyURL, function(d) {
+    var storyDetails = "<h3>Stories for most recently selected graphic</h3>";
+    for (var j = 0; j < d.stories.length; j++) {
+    storyDetails += "<p><b>Story " + d.stories[j].story_id + ":</b> " + d.stories[j].pub_info + "<br>" + d.stories[j].collection_details + "<br>" + d.stories[j].places_mentioned + "<br><b>ETK index:</b> " + d.stories[j].etk_index + "<br><b>Danish publication text:</b> " + d.stories[j].danish_publication + "</p>";
+    }
+      
+    var storytexts = document.getElementById('storytexts');
+    storytexts.innerHTML = storyDetails;
+  });
+
+ }
+
+  var blurbtext = "<b>click to close</b><br>" + freq + storiesWord + 'in the category "' + indexCategories[f.getAttribute("index")] + '" collected at ' + f.getAttribute("sourceCoords") + mentionWord + ' place(s) at ' + f.getAttribute("destCoords") + "<br>Bearing: " + f.getAttribute("bearing") + "&deg;<br>Distance: " + f.getAttribute("distance") + " km" + "<br><b>Story: Collection=>Mentioned</b>" + refInfo;
+  
+  var blurb = "<div class='info_blurb'>" + blurbtext + "</div>";
+
+  var infowin = document.getElementById('infowin');
+  infowin.style.width = "250px";
+  infowin.style.maxHeight = "200px";
+  infowin.style.overflow = "auto";
+  infowin.style.left = evt.clientX + "px";
+  infowin.style.top = evt.clientY + "px";
+  infowin.style.position = 'absolute';
+  infowin.style.display = 'block';
+  infowin.style.border = '1px solid';
+                      
+  infowin.innerHTML = blurb; 
+  
+  infowin.addEventListener("mousedown", function(evt){  
+                            infowin.innerHTML = "";
+                            infowin.style.border = '';
+                      }, false); 
+
+}
+
+function markerClick(f, evt) {
+
+  var storiesWord = " stories ";
+  var mentionWord = " mention ";
+  var freq = f.getAttribute("freq");
+  if (freq == 1) {
+    storiesWord = " story ";
+    mentionWord = " mentions ";
+  }
+
+ if (showStoryTexts == 1) {
+  var refStories = f.getAttribute("stories").split(" ");
+  var uniqueStories = [];
+  
+  for (var i=0; i < refStories.length; i++) {
+    if ($.inArray(refStories[i], uniqueStories) == -1) {
+      uniqueStories.push(refStories[i]);
+    }
+  }
+  
+  var uniqueStoriesString = uniqueStories.join("-");
+
+//  var storyURL = "http://localhost/~pbroadwell_local/maps/witchhunter/GetStories.php?stories=" + uniqueStoriesString; 
+  var storyURL = "http://etkspace.scandinavian.ucla.edu/maps/witchhunter/GetStories.php?stories=" + uniqueStoriesString;
+  $.getJSON( storyURL, function(d) {
+    var storyDetails = "<h3>Stories for most recently selected graphic</h3>";
+    for (var j = 0; j < d.stories.length; j++) {
+    storyDetails += "<p><b>Story " + d.stories[j].story_id + ":</b> " + d.stories[j].pub_info + "<br>" + d.stories[j].collection_details + "<br>" + d.stories[j].places_mentioned + "<br><b>ETK index:</b> " + d.stories[j].etk_index + "<br><b>Danish publication text:</b> " + d.stories[j].danish_publication + "</p>";
+    }
+      
+    var storytexts = document.getElementById('storytexts');
+    storytexts.innerHTML = storyDetails;
+  });
+ }
+
+  var blurbtext = "<b>click to close</b><br>" + freq + storiesWord + 'in the category "' + indexCategories[f.getAttribute("index")] + '"' + mentionWord + 'this place.<br>Coords: ' + f.getAttribute("lat") + "N, " + f.getAttribute("lon") + "E<br><b>Story ID=>Place name (ID)</b><br>" + f.getAttribute("places");
+  var blurb = "<div class='info_blurb'>" + blurbtext + "</div>";
+
+  var infowin = document.getElementById('infowin');
+  infowin.style.width = "250px";
+  infowin.style.maxHeight = "200px";
+  infowin.style.overflow = "auto";
+  infowin.style.left = evt.clientX + "px";
+  infowin.style.top = evt.clientY + "px";
+  infowin.style.position = 'absolute';
+  infowin.style.display = 'block';
+  infowin.style.border = '1px solid';
+                      
+  infowin.innerHTML = blurb; 
+  
+  infowin.addEventListener("mousedown", function(evt){  
+                            infowin.innerHTML = "";
+                            infowin.style.border = '';
+                      }, false); 
+}
+
+function arrowMouse(f, evt, fillcolor, opacity){
+  //  var featName = f.getAttribute("feat_name");
+  var vectorID = f.getAttribute("index") + "_vector_" + parseInt(f.getAttribute("vectorID"));
+  var vector = document.getElementById(vectorID);
+  vector.setAttribute("opacity", opacity);
+  vector.setAttribute("stroke", fillcolor);
+  f.setAttribute("fill", fillcolor);
+  f.setAttribute("opacity", opacity);
+}
+
+function markerMouse(f, evt, fillcolor, opacity){
+  //  var featName = f.getAttribute("feat_name");
+  f.setAttribute("fill", fillcolor);
+  f.setAttribute("opacity", opacity);
+}
+
+function lineMouse(f, evt, linecolor, opacity){
+  //  var featName = f.getAttribute("feat_name");
+  var arrowID = f.getAttribute("index") + "_arrow_" + parseInt(f.getAttribute("vectorID"));
+  //console.log("looking for arrowID: " + arrowID);
+  var arrow = document.getElementById(arrowID);
+  arrow.setAttribute("opacity", opacity);
+  arrow.setAttribute("fill", linecolor);
+  f.setAttribute("opacity", opacity);
+  f.setAttribute("stroke", linecolor);
+}
+
+function drawVector(itemName) {
+
+//  queryStr = 'http://localhost/~pbroadwell_local/maps/witchhunter/GetVectors.php?itemName=' + itemName;
+    queryStr = 'http://etkspace.scandinavian.ucla.edu/maps/witchhunter/GetVectors.php?itemName=' + itemName;
+
+  var newVectors = po.geoJson()
+    .url(queryStr)
+    .id(itemName)
+    .clip(false)
+    .on("load", function(e) {
+
+    for (var i = 0; i < e.features.length; i++) {
+
+    if (e.features[i].data.geometry.type == "LineString") {
+
+      var x1 = e.features[i].data.geometry.coordinates[0][0];
+      var y1 = e.features[i].data.geometry.coordinates[0][1];
+      var x2 = e.features[i].data.geometry.coordinates[1][0];
+      var y2 = e.features[i].data.geometry.coordinates[1][1];
+      var freq = e.features[i].data.properties["frequency"];
+      var bearing = e.features[i].data.properties["bearing"];
+      var distance = e.features[i].data.properties["distance"];
+      var vectorID = e.features[i].data.properties["id"];
+      var refStories = e.features[i].data.properties["stories"];
+      var refPlacePairs = e.features[i].data.properties["placepairs"];
+
+      var f = e.features[i],
+      c = f.element;
+
+      c.setAttribute("stroke-width", freq + "px");
+      c.setAttribute("opacity", .8);
+      c.setAttribute("sourceCoords", y1 + "N, " + x1 + "E");
+      c.setAttribute("destCoords", y2 + "N, " + x2 + "E");
+      c.setAttribute("freq", freq);
+      c.setAttribute("bearing", bearing);
+      c.setAttribute("distance", distance);
+      c.setAttribute("stories", refStories);
+      c.setAttribute("placepairs", refPlacePairs);
+      c.setAttribute("index", itemName);
+      c.setAttribute("vectorID", vectorID);
+      c.setAttribute("id", itemName + "_vector_" + vectorID);
+      c.setAttribute("vector-effect", "non-scaling-stroke");
+//      c.setAttribute("stroke", "blue");
+//      c.setAttribute("stroke", "black");
+      c.setAttribute("stroke", indexColors[itemName]);
+      c.addEventListener("mouseover", function(evt){  
+                        lineMouse(this, evt, "black", 1);  
+                       }, false); 
+      c.addEventListener("mouseout", function(evt){  
+                        lineMouse(this, evt, indexColors[itemName], .8);
+                       }, false); 
+      c.addEventListener("mousedown", function(evt){  
+                        lineClick(this, evt);
+                       }, false);
+
+    } else if (e.features[i].data.geometry.type == "Point") {
+
+      var x = e.features[i].data.geometry.coordinates[0];
+      var y = e.features[i].data.geometry.coordinates[1];
+      var freq = e.features[i].data.properties["frequency"];
+      var bearing = e.features[i].data.properties["bearing"];
+      var distance = e.features[i].data.properties["distance"];
+      var vectorID = e.features[i].data.properties["id"];
+
+      var f = e.features[i],
+      c = f.element;
+      g = f.element = po.svg("g");
+
+//      c.setAttribute("id", itemName + "_arrow_" + vectorID);
+      var m = icons.marker();
+      m.setAttribute("id", itemName + "_arrow_" + vectorID);
+      g.appendChild(m);
+      g.setAttribute("index", itemName);
+      g.setAttribute("vectorID", vectorID);
+      g.setAttribute("id", itemName + "_arrow_" + vectorID);
+      g.setAttribute("opacity", 0.8);
+      g.setAttribute("fill", indexColors[itemName]);
+      g.setAttribute("stroke-width", "2px");
+//      g.setAttribute("vector-effect", "non-scaling-stroke");
+      g.setAttribute("stroke", "black");
+      g.setAttribute("id", i);
+      var scaleFactor = 0.6 + 0.6 * freq / 10;
+      if (bearing > 180) {
+        bearing = bearing - 360;
+      }
+      g.setAttribute("transform", c.getAttribute("transform") + ", rotate(" + bearing + ", 0, 0), scale(" + scaleFactor + "), translate(-16,-18)");
+      g.addEventListener("mouseover", function(evt){  
+                        arrowMouse(this, evt, "black", 1);  
+                       }, false); 
+      g.addEventListener("mouseout", function(evt){  
+                        arrowMouse(this, evt, indexColors[itemName], 0.8);
+                       }, false); 
+      c.parentNode.replaceChild(g, c);
+
+    }
+
+  }
+
+  });
+
+  map.add(newVectors);
+  itemVectors[itemName] = newVectors;  
+
+//  return newVectors;
+
+}
+
+function getPoints(checked, indexName) {
+
+  if (checked == false) {
+    if (indexName == "parishes") {
+//      map.remove(parishBorders);
+      var pb = document.getElementById("parishPaths");
+      pb.setAttribute("opacity", 0);
+    } else if (indexName == "counties") {
+      var ce = document.getElementById("countyBorders");
+      ce.setAttribute("opacity", 0);
+    } else if (indexName == "historical") {
+      var hm = document.getElementById("historicalMap");
+      hm.setAttribute("opacity", 0);
+    } else if (indexName == "aerial") {
+      var at = document.getElementById("aerialMap");
+      at.setAttribute("opacity", 0);
+      map.remove(aerialTiles);
+    } else if (indexName == "plots") {
+      var pldiv = document.getElementById("imagearea");
+      pldiv.innerHTML = "";
+      showPlots = 0;
+    } else if (indexName == "texts") {
+      var stdiv = document.getElementById("storytexts");
+      stdiv.innerHTML = "";
+      showStoryTexts = 0;
+    } else if (indexName == "vectors") {
+      for (var index in itemVectors) {
+        map.remove(itemVectors[index]);
+//        delete itemVectors[index];
+      }
+    } else if (indexName == "markers") {
+      for (var index in itemMarkers) {
+        map.remove(itemMarkers[index]);
+//        delete itemMarkers[index];
+      }
+    } else {
+//      if (document.getElementById("markers").checked == true)
+      if (indexName in itemMarkers) {
+        map.remove(itemMarkers[indexName]);
+        delete itemMarkers[indexName];
+      }
+//      if (document.getElementById("vectors").checked == true)
+      if (indexName in itemVectors) {
+        map.remove(itemVectors[indexName]);
+        delete itemVectors[indexName];
+      }
+    }
+    return;
+  }
+
+  if (indexName == "parishes") {
+    map.add(parishBorders);
+    var pb = document.getElementById("parishPaths");
+    pb.setAttribute("opacity", 1);
+    return;
+  } else if (indexName == "counties") {
+    map.add(counties);
+    var ce = document.getElementById("countyBorders");
+    ce.setAttribute("opacity", 1);
+    return;
+  } else if (indexName == "historical") {
+//    map.add(historicalTiles);
+      var hm = document.getElementById("historicalMap");
+      hm.setAttribute("opacity", 1);
+    return;
+  } else if (indexName == "aerial") {
+      map.add(aerialTiles);
+      var at = document.getElementById("aerialMap");
+      at.setAttribute("opacity", .5);
+    return;
+  } else if (indexName == "plots") {
+    showPlots = 1;
+    return;
+  } else if (indexName == "texts") {
+    showStoryTexts = 1;
+    return;
+  } else if (indexName == "vectors") {
+    for (var index in itemVectors) {
+      drawVector(index);
+    }
+    return;
+  } else if (indexName == "markers") {
+    for (var index in itemMarkers) {
+      drawMarkers(index);
+    }
+    return;
+  }
+
+  if ((document.getElementById("vectors").checked == false) && (document.getElementById("markers").checked == false)) {
+    document.getElementById(indexName).checked = false;
+    alert('At least one of the "Show" options must be checked before selecting a topic.'); 
+  }
+
+  if (document.getElementById("vectors").checked == true) {
+    drawVector(indexName);
+//    console.log("returned from drawVectors");
+    if (showPlots == 1) {
+      loadGraphs(indexName);
+    }
+  }
+  
+  if (document.getElementById("markers").checked == true) {
+    drawMarkers(indexName);
+    if ((showPlots == 1) && (document.getElementById("vectors").checked == false)) {
+      loadGraphs(indexName);
+    }
+  }
+
+}
+
+function pollImage(imageURL) {
+
+  var checkImage = function() {
+    $.ajax({
+      type: 'HEAD',
+      url: imageURL,
+      success: function (data) {
+        console.log("Found image " + imageURL);
+        imgHTML = document.getElementById("imagearea").innerHTML;
+        imgHTML += '<img src="'+imageURL+'" width="500px" height="500px">';
+        document.getElementById("imagearea").innerHTML = imgHTML;
+        clearInterval(interval);
+      },
+      error: function (result) {
+        console.log("Couldn't load image " + imageURL);
+      }
+//      complete: function() { pollImage(imageURL); }
+    });
+  };
+  var interval = setInterval(checkImage, 2000); 
+  checkImage();
+};
+
+/*
+var timerForLoadingResult=setInterval(checkServerForFile,4000);
+  
+function checkServerForFile(url) { 
+  $.ajax({
+    type: "POST",
+    cache: false,
+    url: url,
+    success: function (result) {
+      if (result) { //do something
+        clearInterval(timerForLoadingResult); // clear timer
+      }
+   ; }
+  });
+}
+*/
+function loadGraphs(indexName) {
+
+  // XXX PMB: Might need to check if image exists, possibly loop until it's created
+
+  console.log("loadGraphs called for " + indexName);
+
+//  imagename = indexName.replace("ETK_","");
+  imagename = indexName;
+  var imgprefix = "direction_graphs/" + imagename;
+  
+  var imgHTML = '<h3>Distances, bearings, and frequencies of mentioned places for the most recently selected topic:</h3>';
+  
+  document.getElementById("imagearea").innerHTML = imgHTML;
+
+  var imgpath = imgprefix + "_distances.png";
+  pollImage(imgpath);
+//  imgHTML += '<img src="'+imgpath+'" width="500px" height="500px">';
+  
+  imgpath = imgprefix + "_normdist.png";
+  pollImage(imgpath);
+  
+  imgpath = imgprefix + "_bearings.png";
+  pollImage(imgpath);
+//  imgHTML += '<img src="'+imgpath+'" width="500px" height="500px">';
+  
+  imgpath = imgprefix + "_binhist.png";
+  pollImage(imgpath);
+
+//  imgHTML += '<img src="'+imgpath+'" width="500px" height="500px">';
+  
+  imgpath = imgprefix + "_logplot.png";
+  pollImage(imgpath);
+//  imgHTML += '<img src="'+imgpath+'" width="500px" height="500px">';
+  
+  imgpath = imgprefix + "_freq.png";
+  pollImage(imgpath);
+//  imgHTML += '<img src="'+imgpath+'" width="500px" height="500px">';
+  
+  imgpath = imgprefix + "_cart.png";
+  pollImage(imgpath);
+  
+  imgpath = imgprefix + "_cart2.png";
+  pollImage(imgpath);
+  
+}
+
+indexColors = [];
+
+indexColors['ETK_churches'] = "#D8BF92";
+indexColors['ETK_cunningfolk'] = "#FFFF00"; 
+indexColors['ETK_deathport'] = "#F4A460"; 
+indexColors['ETK_devil'] = "#FFD700"; 
+indexColors['ETK_elves'] = "#FF8C00"; 
+indexColors['ETK_farmtowns'] = "#FF7F50"; 
+indexColors['ETK_femalerev'] = "#FF4500"; 
+indexColors['ETK_forbears'] = "#FF0000"; 
+indexColors['ETK_hauntrev'] = "#FF00FF"; 
+indexColors['ETK_heroes'] = "#FF69B4"; 
+indexColors['ETK_houses'] = "#B22222"; 
+indexColors['ETK_illnesses'] = "#DDA0DD"; 
+indexColors['ETK_lightport'] = "#B0C4DE"; 
+indexColors['ETK_manorlords'] = "#87CEEB"; 
+indexColors['ETK_ministers'] = "#ADFF2F"; 
+indexColors['ETK_mound'] = "#90EE90"; 
+indexColors['ETK_nisser'] = "#808000"; 
+indexColors['ETK_oldagriculture'] = "#6A6ACD"; 
+indexColors['ETK_outdoors'] = "#556B2F"; 
+indexColors['ETK_parties'] = "#7FFF00"; 
+indexColors['ETK_people'] = "#708090"; 
+indexColors['ETK_placelegends'] = "#696969"; 
+indexColors['ETK_plague'] = "#2F4F4F"; 
+indexColors['ETK_religious'] = "#006400"; 
+indexColors['ETK_revenantsland'] = "#000080"; 
+indexColors['ETK_revenantsplaces'] = "#020202"; 
+indexColors['ETK_robbers'] = "#800080"; 
+indexColors['ETK_smallkings'] = "#DC143C"; 
+indexColors['ETK_strandings'] = "#FF69B4"; 
+indexColors['ETK_travmonst'] = "#778899"; 
+indexColors['ETK_treasure'] = "#00FA9A"; 
+indexColors['ETK_villeinage'] = "#8B0000"; 
+indexColors['ETK_waterspirits'] = "#BABAB2"; 
+indexColors['ETK_werenight'] = "#CD5C5C"; 
+indexColors['ETK_witches'] = "#91C2A8"; 
+indexColors['ETK_wivernsetc'] = "#8B4513"; 
+
+indexColors['Informant_1446'] = "#000000";
+indexColors['Informant_779'] = "#000000";
+indexColors['Informant_454'] = "#000000";
+indexColors['Informant_1414'] = "#000000";
+indexColors['Informant_1605'] = "#000000";
+
+var indexCategories = [];
+
+indexCategories['ETK_churches'] = "Churches and their construction. Monasteries, holy springs, etc.";
+indexCategories['ETK_cunningfolk'] = "Cunning men and women and their activities"; 
+indexCategories['ETK_deathport'] = "Death portents"; 
+indexCategories['ETK_devil'] = "About the Devil and being in league with him"; 
+indexCategories['ETK_elves'] = "Elves"; 
+indexCategories['ETK_farmtowns'] = "Legends about farms and towns"; 
+indexCategories['ETK_femalerev'] = "Female revenants"; 
+indexCategories['ETK_forbears'] = "Our forbears' way of thinking and spiritual live"; 
+indexCategories['ETK_hauntrev'] = "Diverse hauntings and conjuring of revenants"; 
+indexCategories['ETK_heroes'] = "Heroes and their sport"; 
+indexCategories['ETK_houses'] = "Houses and life in them"; 
+indexCategories['ETK_illnesses'] = "Human and cattle illnesses"; 
+indexCategories['ETK_lightport'] = "Lights and portents"; 
+indexCategories['ETK_manorlords'] = "Manor lords, ladies, and mistresses"; 
+indexCategories['ETK_ministers'] = "Minisers"; 
+indexCategories['ETK_mound'] = "Mound dwellers (Hidden folk)"; 
+indexCategories['ETK_nisser'] = "Household spirits"; 
+indexCategories['ETK_oldagriculture'] = "Concerning earlier agricultural practices"; 
+indexCategories['ETK_outdoors'] = "Outdoor life"; 
+indexCategories['ETK_parties'] = "Social gatherings and parties"; 
+indexCategories['ETK_people'] = "Diverse people"; 
+indexCategories['ETK_placelegends'] = "Diverse place legends"; 
+indexCategories['ETK_plague'] = "Plague and illnesses"; 
+indexCategories['ETK_religious'] = "Religious legends"; 
+indexCategories['ETK_revenantsland'] = "Revenants on ill-gotten land"; 
+indexCategories['ETK_revenantsplaces'] = "Revenants in diverse places"; 
+indexCategories['ETK_robbers'] = "Robbers, murderers and thieves"; 
+indexCategories['ETK_smallkings'] = "Small kings and their feuds. Kings. Enemy invasions"; 
+indexCategories['ETK_strandings'] = "Strandings"; 
+indexCategories['ETK_travmonst'] = "Traveling monsters"; 
+indexCategories['ETK_treasure'] = "Legends about treasure"; 
+indexCategories['ETK_villeinage'] = "From the time of villeinage"; 
+indexCategories['ETK_waterspirits'] = "Water spirits"; 
+indexCategories['ETK_werenight'] = "Werewolves and nightmares"; 
+indexCategories['ETK_witches'] = "Witches and their sport"; 
+indexCategories['ETK_wivernsetc'] = "Wiverns and small creepy-crawlies"; 
+
+indexCategories['Informant_1446'] = "(Ane) Margrete Jensdatter"; 
+indexCategories['Informant_779'] = "Jens (Bitte Jens) Kristensen"; 
+indexCategories['Informant_454'] = "Jens Peter Pedersen"; 
+indexCategories['Informant_1414'] = "Kirsten Marie Pedersdatter"; 
+indexCategories['Informant_1605'] = "Peder Johansen"; 
+
+</script>
+
+<!-- <link rel="shortcut icon" type="image/png" href="http://localhost/~pbroadwell_local/etkSpace/Documents/favicon.ico" /> -->
+
+</head>
+<body onload="initialize();">
+<div id="controlsDiv"></div>
+</div>
+<div id="status"></div>
+<div class="container">
+  <a href="http://dev.cdh.ucla.edu/~newmedia/DFL2/" target=newtab><img src="WitchHunter.png" onmouseover="this.src='WitchHunter_mouse.png'" onmouseout="this.src='WitchHunter.png'" /></a>
+  <div id="map_wrapper" class="leftmost">
+    <div id="map_canvas" style="vertical-align:top"></div><br>
+    <div width="500px" style="text-align:right;vertical-align:bottom;font-size:10px;color:#000000">Map data CC-By-SA<a href="http://www.openstreetmap.org/">OpenStreetMap</a>, <a href="http://fugro.openstreetmap.dk">Fugro Aerial Mapping A/S</a></div>
+  </div>
+  <div id="infowin" class="info_window" style="display:none"></div>
+  <div id="etk_indices" class="rightmost">
+    <div style="font-size:14px;vertical-align:middle;color:#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Story topic indices:</b></div><br>
+    <input name="box" type="checkbox" id="ETK_mound" onClick="getPoints(this.checked, 'ETK_mound')" />
+    <a href="#" onClick="selectIndex('ETK_mound');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Mound dwellers (Hidden folk)&nbsp;<div style="background-color:#90EE90">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_elves" onClick="getPoints(this.checked, 'ETK_elves')" />
+    <a href="#" onClick="selectIndex('ETK_elves');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Elves&nbsp;<div style="background-color:#FF8C00">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_nisser" onClick="getPoints(this.checked, 'ETK_nisser')" />
+    <a href="#" onClick="selectIndex('ETK_nisser');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Household spirits&nbsp;<div style="background-color:#808000">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_travmonst" onClick="getPoints(this.checked, 'ETK_travmonst')" />
+    <a href="#" onClick="selectIndex('ETK_travmonst');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Traveling monsters&nbsp;<div style="background-color:#778899">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_waterspirits" onClick="getPoints(this.checked, 'ETK_waterspirits')" />
+    <a href="#" onClick="selectIndex('ETK_waterspirits');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Water spirits&nbsp;<div style="background-color:#BABAB2">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_wivernsetc" onClick="getPoints(this.checked, 'ETK_wivernsetc')" />
+    <a href="#" onClick="selectIndex('ETK_wivernsetc');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Wiverns and small creepy-crawlies&nbsp;<div style="background-color:#8B4513">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_werenight" onClick="getPoints(this.checked, 'ETK_werenight')" />
+    <a href="#" onClick="selectIndex('ETK_werenight');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Werewolves and nightmares&nbsp;<div style="background-color:#CD5C5C">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_religious" onClick="getPoints(this.checked, 'ETK_religious')" />
+    <a href="#" onClick="selectIndex('ETK_religious');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Religious legends&nbsp;<div style="background-color:#006400">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_deathport" onClick="getPoints(this.checked, 'ETK_deathport')" />
+    <a href="#" onClick="selectIndex('ETK_deathport');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Death portents&nbsp;<div style="background-color:#F4A460">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_lightport" onClick="getPoints(this.checked, 'ETK_lightport')" />
+    <a href="#" onClick="selectIndex('ETK_lightport');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Lights and portents&nbsp;<div style="background-color:#B0C4DE">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_heroes" onClick="getPoints(this.checked, 'ETK_heroes')" />
+    <a href="#" onClick="selectIndex('ETK_heroes');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Heroes and their sport&nbsp;<div style="background-color:#FF69B4">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_churches" onClick="getPoints(this.checked, 'ETK_churches')" />
+    <a href="#" onClick="selectIndex('ETK_churches');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Churches, monasteries, holy springs&nbsp;<div style="background-color:#D8BF92">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_farmtowns" onClick="getPoints(this.checked, 'ETK_farmtowns')" />
+    <a href="#" onClick="selectIndex('ETK_farmtowns');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Legends about farms and towns&nbsp;<div style="background-color:#FF7F50">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_placelegends" onClick="getPoints(this.checked, 'ETK_placelegends')" />
+    <a href="#" onClick="selectIndex('ETK_placelegends');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Diverse place legends&nbsp;<div style="background-color:#696969">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_treasure" onClick="getPoints(this.checked, 'ETK_treasure')" />
+    <a href="#" onClick="selectIndex('ETK_treasure');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Legends about treasure&nbsp;<div style="background-color:#00FA9A">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_smallkings" onClick="getPoints(this.checked, 'ETK_smallkings')" />
+    <a href="#" onClick="selectIndex('ETK_smallkings');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Small kings and their feuds... Enemy invasions&nbsp;<div style="background-color:#DC143C">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_manorlords" onClick="getPoints(this.checked, 'ETK_manorlords')" />
+    <a href="#" onClick="selectIndex('ETK_manorlords');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Manor lords, ladies and mistresses&nbsp;<div style="background-color:#87CEEB">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_ministers" onClick="getPoints(this.checked, 'ETK_ministers')" />
+    <a href="#" onClick="selectIndex('ETK_ministers');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Ministers&nbsp;<div style="background-color:#ADFF2F">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_people" onClick="getPoints(this.checked, 'ETK_people')" />
+    <a href="#" onClick="selectIndex('ETK_people');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Diverse people&nbsp;<div style="background-color:#708090">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_robbers" onClick="getPoints(this.checked, 'ETK_robbers')" />
+    <a href="#" onClick="selectIndex('ETK_robbers');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Robbers, murderers and thieves&nbsp;<div style="background-color:#800080">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_strandings" onClick="getPoints(this.checked, 'ETK_strandings')" />
+    <a href="#" onClick="selectIndex('ETK_strandings');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Strandings&nbsp;<div style="background-color:#FF69B4">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_plague" onClick="getPoints(this.checked, 'ETK_plague')" />
+    <a href="#" onClick="selectIndex('ETK_plague');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Plague and illnesses&nbsp;<div style="background-color:#2F4F4F">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_hauntrev" onClick="getPoints(this.checked, 'ETK_hauntrev')" />
+    <a href="#" onClick="selectIndex('ETK_hauntrev');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Diverse hauntings and conjuring of revenants&nbsp;<div style="background-color:#FF00FF">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_femalerev" onClick="getPoints(this.checked, 'ETK_femalerev')" />
+    <a href="#" onClick="selectIndex('ETK_femalerev');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Female revenants&nbsp;<div style="background-color:#FF4500">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_revenantsland" onClick="getPoints(this.checked, 'ETK_revenantsland')" />
+    <a href="#" onClick="selectIndex('ETK_revenantsland');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Revenants on ill-gotten land&nbsp;<div style="background-color:#000080">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_revenantsplaces" onClick="getPoints(this.checked, 'ETK_revenantsplaces')" />
+    <a href="#" onClick="selectIndex('ETK_revenantsplaces');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Revenants in diverse places&nbsp;<div style="background-color:#020202">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_devil" onClick="getPoints(this.checked, 'ETK_devil')" />
+    <a href="#" onClick="selectIndex('ETK_devil');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">About the Devil and being in league with him&nbsp;<div style="background-color:#FFD700">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_cunningfolk" onClick="getPoints(this.checked, 'ETK_cunningfolk')" />
+    <a href="#" onClick="selectIndex('ETK_cunningfolk');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Cunning men and women and their activities&nbsp;<div style="background-color:#FFFF00">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_witches" onClick="getPoints(this.checked, 'ETK_witches')" />
+    <a href="#" onClick="selectIndex('ETK_witches');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Witches and their sport&nbsp;<div style="background-color:#91C2A8">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_illnesses" onClick="getPoints(this.checked, 'ETK_illnesses')" />
+    <a href="#" onClick="selectIndex('ETK_illnesses');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Human and cattle illnesses&nbsp;<div style="background-color:#DDA0DD">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_oldagriculture" onClick="getPoints(this.checked, 'ETK_oldagriculture')" />
+    <a href="#" onClick="selectIndex('ETK_oldagriculture');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Concerning earlier agricultural practices&nbsp;<div style="background-color:#6A6ACD">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_villeinage" onClick="getPoints(this.checked, 'ETK_villeinage')" />
+    <a href="#" onClick="selectIndex('ETK_villeinage');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">From the time of villeinage&nbsp;<div style="background-color:#8B0000">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_houses" onClick="getPoints(this.checked, 'ETK_houses')" />
+    <a href="#" onClick="selectIndex('ETK_houses');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Houses and life in them&nbsp;<div style="background-color:#B22222">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_parties" onClick="getPoints(this.checked, 'ETK_parties')" />
+    <a href="#" onClick="selectIndex('ETK_parties');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Social gatherings and parties&nbsp;<div style="background-color:#7FFF00">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_outdoors" onClick="getPoints(this.checked, 'ETK_outdoors')" />
+    <a href="#" onClick="selectIndex('ETK_outdoors');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Outdoor life&nbsp;<div style="background-color:#556B2F">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="ETK_forbears" onClick="getPoints(this.checked, 'ETK_forbears')" />
+    <a href="#" onClick="selectIndex('ETK_forbears');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Our forebears' way of thinking and spiritual life&nbsp;<div style="background-color:#FF0000">&nbsp;&nbsp;</div></div></a><br>
+  </div>
+  <div id="informants" class="rightmostest">
+    <div style="font-size:14px;vertical-align:middle;color:#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Display options:</b></div><br>
+    <input name="box" type="checkbox" checked="true" id="historical" onClick="getPoints(this.checked, 'historical')" />
+    <a href="#" onClick="selectIndex('historical');return false"><div style="font-size:14px;vertical-align:middle;color:#606060">Historical maps</div></a>&nbsp;&nbsp;<input name="box" type="checkbox" id="aerial" onClick="getPoints(this.checked, 'aerial')" />
+<!--    <a href="#" onClick="selectIndex('parishes');return false"><div style="font-size:14px;vertical-align:middle;color:#606060">Sogne borders</div></a><br>
+<input name="box" type="checkbox" id="aerial" onClick="getPoints(this.checked, 'aerial')" /> -->
+    <a href="#" onClick="selectIndex('aerial');return false"><div style="font-size:14px;vertical-align:middle;color:#606060">Aerial images</div></a><br>
+   <!-- &nbsp;<div id="aerialSlider"></div>-->
+    <input name="box" type="checkbox" id="markers" checked="true" onClick="getPoints(this.checked, 'markers')" />
+    <a href="#" onClick="selectIndex('markers');return false"><div style="font-size:14px;vertical-align:middle;color:#606060"><b>Show place/topic co-occurrence markers</b></div></a><br>
+    <input name="box" type="checkbox" id="vectors" checked="false" onClick="getPoints(this.checked, 'vectors')" />
+    <a href="#" onClick="selectIndex('vectors');return false"><div style="font-size:14px;vertical-align:middle;color:#606060"><b>Show place collected->mentioned arrows</b></div></a><br>
+    <input name="box" type="checkbox" id="plots" checked="false" onClick="getPoints(this.checked, 'plots')" />
+    <a href="#" onClick="selectIndex('plots');return false"><div style="font-size:14px;vertical-align:middle;color:#606060"><b>Show visualizations of spatial statistics</b></div></a><br>
+    <input name="box" type="checkbox" id="texts" checked="true" onClick="getPoints(this.checked, 'texts')" />
+    <a href="#" onClick="selectIndex('texts');return false"><div style="font-size:14px;vertical-align:middle;color:#606060"><b>Show stories related to map objects</b></div></a><br>
+<!--    <input name="box" type="checkbox" id="counties" onClick="getPoints(this.checked, 'counties')" />
+    <a href="#" onClick="selectIndex('counties');return false"><div style="font-size:14px;vertical-align:middle;color:#000000"><b>Show computed herred borders</b>&nbsp;<div style="background-color:#FFFFFF">&nbsp;&nbsp;</div></div></a><br> -->
+    <div style="font-size:14px;vertical-align:middle;color:#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Core informants:</b></div><br>
+    <input name="box" type="checkbox" id="Informant_779" onClick="getPoints(this.checked, 'Informant_779')" />
+    <a href="#" onClick="selectIndex('Informant_779');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Jens (Bitte Jens) Kristensen&nbsp;<div style="background-color:#000000">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="Informant_454" onClick="getPoints(this.checked, 'Informant_454')" />
+    <a href="#" onClick="selectIndex('Informant_454');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Jens Peter Pedersen&nbsp;<div style="background-color:#000000">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="Informant_1414" onClick="getPoints(this.checked, 'Informant_1414')" />
+    <a href="#" onClick="selectIndex('Informant_1414');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Kirsten Marie Pedersdatter&nbsp;<div style="background-color:#000000">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="Informant_1446" onClick="getPoints(this.checked, 'Informant_1446')" />
+    <a href="#" onClick="selectIndex('Informant_1446');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">(Ane) Margrete Jensdatter&nbsp;<div style="background-color:#000000">&nbsp;&nbsp;</div></div></a><br>
+    <input name="box" type="checkbox" id="Informant_1605" onClick="getPoints(this.checked, 'Informant_1605')" />
+    <a href="#" onClick="selectIndex('Informant_1605');return false"><div style="font-size:14px;vertical-align:middle;color:#000000">Peder Johansen&nbsp;<div style="background-color:#000000">&nbsp;&nbsp;</div></div></a><br>
+  </div>
+
+  <div class="bottommost" id="imagearea">
+  </div>
+  
+  <div class="bottommostest" id="storytexts">
+  </div>
+
+</body>
+</html>
